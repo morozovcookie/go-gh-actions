@@ -22,7 +22,7 @@ jobs:
       - name: Run Go Test
         run: go test -race -cover -coverprofile ./...
   docker-build-and-push:
-    name: Cocker Build And Push
+    name: Docker Build And Push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,12 +33,19 @@ jobs:
           registry: docker.pkg.github.com
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker Meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: go-gh-actions/http-server
+          tag-sha: true
       - name: Build Docker Image And Push
         uses: docker/build-push-action@v2
         with:
           context: .
           file: scripts/docker/Dockerfile
           push: true
-          tags: go-gh-actions:${{ steps.docker_build.outputs.digest }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
