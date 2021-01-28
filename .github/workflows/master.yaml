@@ -35,7 +35,7 @@ jobs:
         id: docker_meta
         uses: crazy-max/ghaction-docker-meta@v1
         with:
-          images: docker.pkg.github.com/morozovcookie/go-gh-actions/http-server
+          images: docker.pkg.github.com/${{ github.repository }}/http-server
           tag-sha: true
       - name: Login to GitHub Packages Docker Registry
         uses: docker/login-action@v1
@@ -44,8 +44,10 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build Docker Image And Push
+        id: docker_build
         uses: docker/build-push-action@v2
         with:
+          push: true
           context: .
           file: scripts/docker/Dockerfile
           tags: ${{ steps.docker_meta.outputs.tags }}
