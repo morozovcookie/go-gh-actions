@@ -1,0 +1,44 @@
+name: Simple Workflow
+on: push
+jobs:
+  golangci-lint:
+    name: GolangCI-Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run GolangCI-Lint
+        uses: golangci/golangci-lint-action@v2
+  go-test:
+    name: Go Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.15
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Run Go Test
+        run: go test -race -cover -coverprofile ./...
+  docker-build-and-push:
+    name: Cocker Build And Push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Login to GitHub Packages Docker Registry
+        uses: docker/login-action@v1
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build Docker Image And Push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: scripts/docker/Dockerfile
+          push: true
+          tags: go-gh-actions:${{ steps.docker_build.outputs.digest }}
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
