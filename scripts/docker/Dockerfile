@@ -7,7 +7,7 @@ ADD go.mod ./
 
 RUN go mod download
 
-ADD ./cmd ./
+ADD ./cmd ./cmd
 
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags "-s -w" \
